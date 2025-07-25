@@ -3,9 +3,10 @@ library(sf)
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(plotly)
 
 # --- Leer datos una vez ---
-shapefile_path <- "D:/Documents_2/LABORAL/2025/DATACHALLENGE_LAB_UPCH/data/shapefile/DISTRITOS_inei_geogpsperu_suyopomalia.shp"
+shapefile_path <- "D:/Documents_2/LABORAL/2025/DATACHALLENGE_LAB_UPCH/data/DISTRITOS_inei_geogpsperu_suyopomalia.shp"
 csv_path <- "D:/Documents_2/LABORAL/2025/DATACHALLENGE_LAB_UPCH/data/malaria.csv"
 
 gdf <- st_read(shapefile_path)
@@ -48,7 +49,8 @@ ui <- fluidPage(
       )
     ),
     mainPanel(
-      plotOutput("mapa", height = "700px")
+      plotlyOutput("mapa", height = "600px"),
+      plotlyOutput("serie", height = "300px")
     )
   )
 )
@@ -79,25 +81,33 @@ server <- function(input, output, session) {
       mutate(valor = ifelse(is.na(valor), 0, valor))
   })
   
-  output$mapa <- renderPlot({
-    titulo <- if (input$modo == "unico") {
-      paste("Casos de", input$enfermedad, "- Semana", input$semana_unico, "Año", input$ano_unico)
-    } else {
-      paste("Casos acumulados de", input$enfermedad,
-            "- Años", input$ano_rango[1], "a", input$ano_rango[2],
-            "- Semanas", input$semana_rango[1], "a", input$semana_rango[2])
-    }
-    
-    ggplot(data = datos_mapa()) +
-      geom_sf(aes(fill = valor), color = "gray", size = 0.1) +
+  output$mapa <- renderPlotly({
+    p <- ggplot(data = datos_mapa()) +
+      geom_sf(aes(fill = valor, text = UBIGEO), color = "gray", size = 0.1) +
       scale_fill_gradient(name = "Casos", low = "#fff5f0", high = "#99000d") +
-      labs(title = titulo) +
-      theme_minimal() +
-      theme(
-        plot.title = element_text(size = 16, face = "bold"),
-        axis.text = element_blank(),
-        axis.ticks = element_blank()
-      )
+      theme_void()
+    
+    ggplotly(p, tooltip = "text") %>%
+      layout(title = list(text = "Haz clic en un distrito para ver la serie temporal"))
+  })
+  
+  output$serie <- renderPlotly({
+    click <- event_data("plotly_click")
+    if (is.null(click)) return(NULL)
+    
+    # Obtener el UBIGEO seleccionado
+    ubigeo_seleccionado <- click$text
+    
+    df_sel <- df %>%
+      filter(UBIGEO == ubigeo_seleccionado) %>%
+      mutate(fecha = paste0(ano, "-W", sprintf("%02d", semana))) %>%
+      arrange(ano, semana)
+    
+    plot_ly(df_sel, x = ~fecha, y = as.formula(paste0("~", input$enfermedad)),
+            type = 'scatter', mode = 'lines+markers',
+            name = input$enfermedad) %>%
+      layout(title = paste("Serie temporal de", input$enfermedad, "en distrito", ubigeo_seleccionado),
+             xaxis = list(title = "Semana"), yaxis = list(title = "Casos"))
   })
 }
 
