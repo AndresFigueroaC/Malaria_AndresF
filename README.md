@@ -5,6 +5,7 @@
 Este script en **R Shiny** genera una **aplicación web interactiva** que muestra un **mapa temático de casos de malaria** (falciparum y vivax) por distrito en el Perú.
 
 🔗 **[¡Haz clic aquí para ver la aplicación en vivo!](https://andresfigueroa.shinyapps.io/data/)**
+![Mapa interactivo de malaria](malaria_mapa_interactivo.png)
 
 ---
 
