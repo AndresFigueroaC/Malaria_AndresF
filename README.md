@@ -14,7 +14,7 @@ Este script en **R Shiny** genera una **aplicación web interactiva** que muestr
 - Carga un **shapefile distrital** (`.shp`) y un archivo **CSV** con datos de malaria.
 - Cruza ambos conjuntos de datos mediante el código **UBIGEO**.
 - Permite seleccionar:
-  - El **tipo de enfermedad**: *falciparum* o *vivax*.
+  - El **tipo de especie**: *falciparum* o *vivax*.
   - Un **año y semana específica** (modo "Único").
   - Un **rango de años y semanas** (modo "Rango").
 - Genera un **mapa temático estático** coloreado según el número de casos usando `ggplot2`.
@@ -28,5 +28,10 @@ Este script en **R Shiny** genera una **aplicación web interactiva** que muestr
 - `sf`: para manejo de datos espaciales (shapefiles).
 - `readr`, `dplyr`: para la lectura y manipulación de datos.
 - `ggplot2`: para la visualización geográfica.
+
+---
+##  Analisis en general
+
+En la zona norte del Peru hay mas casos de malaria, la malaria mas peligrosa es la falciparum
 
 ---
